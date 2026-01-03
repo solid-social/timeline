@@ -1,0 +1,42 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="200" fill="rgba(255,255,255,0.05)"/>
+  <circle cx="1100" cy="530" r="250" fill="rgba(255,255,255,0.05)"/>
+
+  <!-- Card mockup -->
+  <rect x="700" y="180" width="400" height="270" rx="12" fill="white" opacity="0.95"/>
+  <circle cx="740" cy="220" r="20" fill="#1877f2"/>
+  <rect x="775" y="205" width="120" height="14" rx="7" fill="#333"/>
+  <rect x="775" y="225" width="80" height="10" rx="5" fill="#999"/>
+  <rect x="720" y="260" width="360" height="12" rx="6" fill="#eee"/>
+  <rect x="720" y="280" width="300" height="12" rx="6" fill="#eee"/>
+  <rect x="720" y="300" width="340" height="12" rx="6" fill="#eee"/>
+  <rect x="720" y="340" width="360" height="80" rx="8" fill="#f0f2f5"/>
+
+  <!-- Action buttons mockup -->
+  <rect x="720" y="430" width="60" height="8" rx="4" fill="#1877f2"/>
+  <rect x="800" y="430" width="70" height="8" rx="4" fill="#999"/>
+  <rect x="890" y="430" width="50" height="8" rx="4" fill="#999"/>
+
+  <!-- Title -->
+  <text x="80" y="280" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="white">Solid Timeline</text>
+
+  <!-- Tagline -->
+  <text x="80" y="350" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="rgba(255,255,255,0.9)">Your data. Your pod. Your timeline.</text>
+
+  <!-- Subtitle -->
+  <text x="80" y="400" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="rgba(255,255,255,0.7)">Decentralized social feed built on Solid</text>
+
+  <!-- URL -->
+  <text x="80" y="560" font-family="monospace" font-size="18" fill="rgba(255,255,255,0.6)">solid-social.github.io/timeline</text>
+</svg>
