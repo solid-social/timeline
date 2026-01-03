@@ -1,356 +1,1235 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="Timeline">
+<html lang="en">
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<meta charset="utf-8">
-	<title>Solid Timeline</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<link href="css/bootstrap.min.css" rel="stylesheet">
-	<link rel="shortcut icon" type="img/png" href="images/favicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solid Timeline</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-	<!--[if lt IE 9]>
-	<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
+    :root {
+      --bg: #f0f2f5;
+      --card: #ffffff;
+      --primary: #1877f2;
+      --text: #050505;
+      --text-secondary: #65676b;
+      --border: #dddfe2;
+      --hover: #f2f3f5;
+    }
 
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+    }
 
-	<link href="css/styles.css" rel="stylesheet">
-	<link href="bower_components/cal-heatmap/cal-heatmap.css" rel="stylesheet">
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
 
+    .header-logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .header-search {
+      margin-left: 16px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 20px;
+      background: var(--bg);
+      width: 240px;
+      font-size: 15px;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .login-btn {
+      padding: 8px 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .login-btn:hover { opacity: 0.9; }
+
+    /* Layout */
+    .container {
+      max-width: 680px;
+      margin: 72px auto 20px;
+      padding: 0 16px;
+    }
+
+    /* Composer */
+    .composer {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .composer-top {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .composer-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .composer-input {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 20px;
+      background: var(--bg);
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .composer-input:focus {
+      outline: none;
+      background: var(--hover);
+    }
+
+    .composer-expanded {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .composer-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 17px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .composer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .composer-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .composer-btn {
+      padding: 8px 12px;
+      background: none;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .composer-btn:hover { background: var(--hover); }
+
+    .post-btn {
+      padding: 8px 24px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .post-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Post */
+    .post {
+      background: var(--card);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .post-header {
+      display: flex;
+      padding: 12px 16px;
+      gap: 12px;
+    }
+
+    .post-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .post-meta {
+      flex: 1;
+    }
+
+    .post-author {
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .post-author:hover { text-decoration: underline; }
+
+    .post-time {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .post-menu {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 50%;
+      color: var(--text-secondary);
+    }
+
+    .post-menu:hover { background: var(--hover); }
+
+    .post-content {
+      padding: 0 16px 12px;
+      font-size: 15px;
+      white-space: pre-wrap;
+    }
+
+    .post-image {
+      width: 100%;
+      max-height: 500px;
+      object-fit: cover;
+    }
+
+    .post-stats {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 16px;
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .post-likes { cursor: pointer; }
+    .post-likes:hover { text-decoration: underline; }
+
+    .post-actions {
+      display: flex;
+      border-top: 1px solid var(--border);
+      padding: 4px 8px;
+    }
+
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      background: none;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .action-btn:hover { background: var(--hover); }
+    .action-btn.liked { color: var(--primary); }
+
+    /* Comments */
+    .comments {
+      padding: 4px 16px 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .comment {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+    }
+
+    .comment-body {
+      background: var(--bg);
+      padding: 8px 12px;
+      border-radius: 18px;
+      max-width: 100%;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .comment-text {
+      font-size: 15px;
+    }
+
+    .comment-time {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-left: 12px;
+      margin-top: 2px;
+    }
+
+    .comment-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .comment-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 20px;
+      background: var(--bg);
+      font-size: 15px;
+    }
+
+    .comment-input:focus { outline: 2px solid var(--primary); }
+
+    /* Login Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .modal {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 24px;
+      width: 400px;
+      max-width: 90vw;
+    }
+
+    .modal h2 {
+      margin-bottom: 16px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .modal-cancel {
+      padding: 10px 20px;
+      background: var(--bg);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    /* Error banner */
+    .error-banner {
+      background: #ffebee;
+      color: #c62828;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+
+    /* Welcome card */
+    .welcome-card {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .welcome-card h2 {
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .welcome-card ul {
+      text-align: left;
+      display: inline-block;
+      margin: 16px 0;
+    }
+
+    .welcome-card li {
+      margin: 8px 0;
+      color: var(--text-secondary);
+    }
+
+    .welcome-card code {
+      display: block;
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin: 12px 0;
+      word-break: break-all;
+    }
+
+    .welcome-footer {
+      margin-top: 16px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .welcome-footer a {
+      color: var(--primary);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+      background: var(--card);
+      border-radius: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .header-search { display: none; }
+      .container { margin-top: 64px; padding: 0 8px; }
+    }
+  </style>
 </head>
 <body>
-	<div class="wrapper" ng-controller="Main">
-		<div class="box">
-			<div class="row row-offcanvas row-offcanvas-left">
+  <div id="app"></div>
 
+  <script type="module">
+    // Polyfill for crypto.randomUUID (needed for non-HTTPS)
+    if (!crypto.randomUUID) {
+      crypto.randomUUID = function() {
+        return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c =>
+          (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
+        )
+      }
+    }
 
-				<!-- sidebar -->
-				<div class="column col-sm-2 col-xs-1 sidebar-offcanvas" id="sidebar">
+    import { h, render } from 'https://esm.sh/preact@10.19.3'
+    import { useState, useEffect, useCallback } from 'https://esm.sh/preact@10.19.3/hooks'
+    import htm from 'https://esm.sh/htm@3.1.1'
+    import * as $rdf from 'https://esm.sh/rdflib@2.2.35'
+    import { Session } from 'https://esm.sh/solid-oidc@0.0.3'
 
-					<ul class="nav">
-						<li><a href="#" data-toggle="offcanvas" class="visible-xs text-center"><i class="glyphicon glyphicon-chevron-right"></i></a></li>
-					</ul>
+    const html = htm.bind(h)
 
-					<ul class="nav hidden-xs" id="lg-menu">
-						<li class="active"><a ng-click="setProfile()"><i class="glyphicon glyphicon-user"></i> {{ name || 'Profile' }}</a></li>
-						<li class="active"><a ng-click="featured()"><i class="glyphicon glyphicon-list-alt"></i> News Feed</a></li>
-						<li><a ng-click="stories()" href="#"><i class="glyphicon glyphicon-list"></i> All Stories</a></li>
-						<li><a ng-click="refresh()" href="#"><i class="glyphicon glyphicon-refresh"></i> Refresh</a></li>
-						<li><hr></li>
-						<li><a target="_blank" href="http://webappmarket.org/">APPS</a></li>
+    // RDF Namespaces
+    const FOAF = $rdf.Namespace('http://xmlns.com/foaf/0.1/')
+    const SIOC = $rdf.Namespace('http://rdfs.org/sioc/ns#')
+    const DCT = $rdf.Namespace('http://purl.org/dc/terms/')
+    const RDF = $rdf.Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#')
+    const LIKE = $rdf.Namespace('http://ontologi.es/like#')
+    const ST = $rdf.Namespace('http://www.w3.org/ns/solid/terms#')
+    const PIM = $rdf.Namespace('http://www.w3.org/ns/pim/space#')
+    const XSD = $rdf.Namespace('http://www.w3.org/2001/XMLSchema#')
 
-						<li class="app" ng-repeat="app in apps"><span><img ng-src="{{app.icon}}" height="16" width="16"><a target="_blank" ng-href="{{app.homepage}}">{{app.name}}</a></span><br></li>
+    // Auth state
+    let currentWebId = null
+    let sessionReady = null
 
-						<!--
-						<li><a href="#"><i class="glyphicon glyphicon-paperclip"></i> Likes</a></li>
-					-->
-				</ul>
+    // Create session with event handlers
+    const session = new Session({
+      onStateChange: (e) => {
+        currentWebId = e.detail.isActive ? e.detail.webId : null
+        updateFetcher()
+      }
+    })
 
-				<!-- tiny only nav-->
-				<ul class="nav visible-xs" id="xs-menu">
-					<li><a href="#featured" class="text-center"><i class="glyphicon glyphicon-list-alt"></i></a></li>
-					<li><a href="#stories" class="text-center"><i class="glyphicon glyphicon-list"></i></a></li>
-					<li><a href="#" class="text-center"><i class="glyphicon glyphicon-paperclip"></i></a></li>
-					<li><a href="#" class="text-center"><i class="glyphicon glyphicon-refresh"></i></a></li>
-				</ul>
+    // Initialize auth - restore session and handle redirect
+    async function initAuthEarly() {
+      try {
+        await session.restore()
+      } catch (e) {}
 
-			</div>
-			<!-- /sidebar -->
+      try {
+        await session.handleRedirectFromLogin()
+      } catch (e) {}
 
-			<!-- main right col -->
-			<div class="column col-sm-10 col-xs-11" id="main">
+      currentWebId = session.webId
+    }
 
-				<!-- top nav -->
-				<div class="navbar navbar-blue navbar-static-top">
-					<div class="navbar-header">
-						<button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
-							<span class="sr-only">Toggle</span>
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-						</button>
-						<a href="#" ng-click="home()" class="navbar-brand logo">S</a>
-					</div>
-					<nav class="collapse navbar-collapse" role="navigation">
-						<form class="navbar-form navbar-left">
-							<div class="input-group input-group-sm" style="max-width:360px;">
-								<input type="text" ng-model="query" class="form-control" placeholder="Search" name="srch-term" id="srch-term">
-								<div class="input-group-btn">
-									<button ng-click="search()" class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
-								</div>
-							</div>
-						</form>
-						<ul class="nav navbar-nav">
-							<li>
-								<a ng-click="home()" href="#"><i class="glyphicon glyphicon-home"></i> Home</a>
-							</li>
-							<li>
-								<a target="_blank" href="https://solid.github.io/solid-inbox/#"><i class="glyphicon glyphicon-inbox"></i> Inbox</a>
-							</li>
-							<!--
-							<li>
-							<a href="#postModal" role="button" data-toggle="modal"><i class="glyphicon glyphicon-plus"></i> Post</a>
-						</li>
-						<li>
-						<a href="#"><span class="badge">badge</span></a>
-					</li>
-				-->
-			</ul>
-			<ul class="nav navbar-nav navbar-right">
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span ng-if="user">{{username}}</span> &nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-user"></i></a>
-					<ul class="dropdown-menu">
-						<li ng-if="!user"><a ng-click="TLSlogin()">Sign In</a></li>
-						<li ng-if="user"><a ng-click="logout()">Sign Out</a></li>
-						<li ng-if="user"><a target="_blank" href="https://linkeddata.github.io/profile-editor/">Edit Profile</a></li>
-						<li ng-if="!user"><a target="_blank" href="https://solid.github.io/solid-idps/">Register</a></li>
-						<li><a target="_blank" href="https://github.com/solid-social/timeline">Source Code</a></li>
-  					<li><a target="_blank" href="https://melvincarvalho.gitbooks.io/solid-social/content/">About</a></li>
-					</ul>
-				</li>
-			</ul>
-		</nav>
-	</div>
-	<!-- /top nav -->
+    // Start auth init immediately
+    sessionReady = initAuthEarly()
 
-	<div class="padding">
-		<div class="full col-sm-9">
+    // Get authenticated fetch
+    function getAuthFetch() {
+      if (session.webId) {
+        return (url, options) => session.authFetch(url, options)
+      }
+      return fetch.bind(window)
+    }
 
-			<!-- content -->
-			<div class="row">
+    // Global store with auth fetch
+    const store = $rdf.graph()
+    let fetcher = $rdf.fetcher(store, { fetch: getAuthFetch(), timeout: 30000 })
 
-				<!-- main col left -->
-				<div class="col-sm-5">
+    // Update fetcher when auth changes
+    function updateFetcher() {
+      fetcher = $rdf.fetcher(store, { fetch: getAuthFetch(), timeout: 30000 })
+    }
 
+    // Solid OIDC Login
+    async function solidLogin(idp) {
+      const issuer = idp.startsWith('http') ? idp : `https://${idp}`
+      await session.login(issuer, window.location.href)
+    }
 
-					<div ng-show="user && !postid" class="well">
-						<form class="form-horizontal" role="form">
-							<h4>What's New</h4>
-							<div class="form-group" style="padding:14px;">
-								<textarea ng-model="post" class="form-control" placeholder="Update your status"></textarea>
-							</div>
-							<button class="btn btn-primary pull-right" ng-click="save()" type="button">Post</button>
-							<ul class="list-inline"><li><a href=""><i class="glyphicon glyphicon-upload"></i></a></li>
-								<li><a href="#imageModal" role="button" data-toggle="modal"><i class="glyphicon glyphicon-camera"></i></a></li>
-								<li><a href=""><i class="glyphicon glyphicon-map-marker"></i></a></li>
-							</ul>
-						</form>
-					</div>
+    // Handle redirect and restore session
+    async function initAuth() {
+      await sessionReady
+      updateFetcher()
+      return session.webId ? { webId: session.webId } : null
+    }
 
-					<div ng-if="!user" class="well">
-						<a ng-click="TLSlogin()">Sign In</a> or <a target="_blank" href="https://solid.github.io/solid-idps/">Register</a>
-					</div>
+    // Logout
+    async function doLogout() {
+      await session.logout()
+      currentWebId = null
+      updateFetcher()
+      window.location.reload()
+    }
 
+    // Fetch profile info
+    async function fetchProfile(webId) {
+      try {
+        const docUrl = webId.split('#')[0]
 
-					<div ng-repeat="n in posts" class="panel panel-default">
+        // Fetch and parse manually to ensure it works
+        const res = await getAuthFetch()(docUrl, {
+          headers: { 'Accept': 'text/turtle, application/ld+json, */*' }
+        })
+        const contentType = res.headers.get('content-type') || ''
+        const rawText = await res.text()
 
-						<div class="panel-heading">
-							<img class="title-img pull-left" ng-show="n[6]" ng-src="{{n[6]}}" height="40" width="40"></img>
-							<a ng-click="setProfile(n[1])" class="name title-name">{{n[5].value}}</a>
-							<a  href="{{n[3]}}" target="_blank" class="time pull-right"><i class="glyphicon glyphicon-chevron-down"></i></a>
-							<br><a class="title-time time" ng-click="showPost(n[3])" href="#" am-time-ago="n[0]"></a>
-						</div>
-						<div ng-if="n[4]" class="panel-thumbnail"><img ng-src="{{n[4]}}" class="img-responsive"></div>
-						<div class="panel-body">
-							<p>
-								<span ng-bind-html="n[2] | parseUrlFilter"></span>
-							</p>
-							<div class="clearfix"></div>
-							<hr>
+        console.log('Profile URL:', docUrl)
+        console.log('Content-Type:', contentType)
+        console.log('Raw response (first 500 chars):', rawText.substring(0, 500))
 
-							<form class="comment-block">
+        // Parse based on content type
+        const mimeType = contentType.includes('json') ? 'application/ld+json' : 'text/turtle'
+        $rdf.parse(rawText, store, docUrl, mimeType)
 
-								<div ng-if="n[8]">
-									<span ng-repeat="l in n[7]" style="color: #5890FF" class="panel panel-default">{{l}} </span> like<span ng-if="n[8] === 1">s</span> this<hr>
-								</div>
+        const me = $rdf.sym(webId)
+        const name = store.any(me, FOAF('name'))
+        const avatar = store.any(me, FOAF('img')) || store.any(me, FOAF('depiction'))
+        const timeline = store.any(me, ST('timeline'))
 
-								<div ng-if="n[10]">
-									<div class="comment-name" ng-repeat="c in n[10]" class="">
-										<div class="comment-img">
-											<img style="vertical-align: top" ng-show="c.img.uri" ng-src="{{c.img.uri}}" height="32" width="32"></img>
-										</div>
-										<div class="comment-text">
-											<a class="name" >{{c.name.value}}</a>
-  										<span>{{c.content.value}}</span><br>
-  										<a class="time" href="{{c.subject.uri}}" target="_blank" am-time-ago="c.created.value"></a>
-									  </div>
-										<hr>
-									</div>
-								</div>
+        // Try pim:storage with both namespaces
+        const SPACE = $rdf.Namespace('http://www.w3.org/ns/pim/space#')
+        let storage = store.any(me, PIM('storage')) || store.any(me, SPACE('storage'))
 
-								<div class="input-group">
+        // Debug logging
+        console.log('Profile loaded for:', webId)
+        console.log('Found storage:', storage?.value)
+        console.log('Found timeline:', timeline?.value)
 
-									<div class="input-group-btn">
+        // Dump all triples about this WebID
+        const allAboutMe = store.statementsMatching(me, null, null)
+        console.log('All triples about me:', allAboutMe.length)
+        allAboutMe.forEach(st => console.log('  ', st.predicate.value, '->', st.object.value))
 
-										<button ng-if="n[9]" title="{{n[7]}}" ng-click="unlike(n[3])" class="btn btn-default" style="color: #5890FF"><i class="glyphicon glyphicon-thumbs-up"></i></button>
-										<button ng-if="!n[9]" title="{{n[7]}}" ng-click="like(n[3])" class="btn btn-default"><i class="glyphicon glyphicon-thumbs-up"></i></button>
+        // Use explicit timeline or derive from storage
+        let timelineUri = timeline?.value
+        const storageUri = storage?.value
 
-										<a href="{{n[3]}}" target="_blank" class="btn btn-default"><i class="glyphicon glyphicon-share"></i></a>
-									</div>
+        if (!timelineUri && storageUri) {
+          // Default to /public/timeline/ in user's storage
+          timelineUri = storageUri.replace(/\/?$/, '/') + 'public/timeline/'
+          console.log('Using default timeline location:', timelineUri)
+        }
 
-								</form>
-								<form ng-submit="addcomment(n.comment, n[3])">
-									<input title="{{n[10]}}" type="text" ng-keyup="$event.keyCode == 13 ? addComment(n.comment, n[3]) : null" class="form-control" ng-model="n.comment" placeholder="Add a comment..">
-								</div>
-							</form>
+        return {
+          webId,
+          name: name?.value || webId.split('/').pop(),
+          avatar: avatar?.value || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(webId)}`,
+          timeline: timelineUri,
+          storage: storageUri
+        }
+      } catch (e) {
+        console.error('Failed to fetch profile:', e)
+        return { webId, name: webId.split('/').pop(), avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(webId)}` }
+      }
+    }
 
-						</div>
-					</div>
+    // Fetch timeline posts
+    async function fetchTimeline(timelineUri) {
+      const posts = []
+      try {
+        // Try to load recent days (last 30 days) - each day is a single .ttl file
+        const today = new Date()
 
-					<div><a ng-if="profile && !postid" ng-click="older()">Older</a></div>
+        for (let i = 0; i < 30; i++) {
+          const date = new Date(today)
+          date.setDate(date.getDate() - i)
+          const dayStr = date.toISOString().slice(0, 10)
+          const dayFileUri = `${timelineUri}${dayStr}.ttl`
 
-				</div>
+          try {
+            // Check if day file exists
+            const dayHead = await getAuthFetch()(dayFileUri, { method: 'HEAD' })
+            if (!dayHead.ok) continue
 
-				<!-- main col right -->
-				<div class="col-sm-7">
+            console.log('Loading day file:', dayFileUri)
+            await fetcher.load(dayFileUri)
+          } catch (e) {
+            // Day file doesn't exist, skip
+          }
+        }
 
-					<div class="panel panel-default">
-						<div class="panel-thumbnail"><img ng-src="{{backgroundImage}}" class="img-responsive"></div>
-						<div class="panel-body">
-							<span ng-if="profile">
-								<p>
-									<img ng-show="profileAvatar" ng-src="{{profileAvatar}}" height="40" width="40"></img>
-									<a class="lead" ng-href="{{profile}}">{{name}}</a> <a ng-click="refresh(profile)" href="#"><i class="glyphicon glyphicon-refresh"></i></a>
-									<button ng-if="friendType" ng-click="addFriend()" class="btn botton3">{{friendType}}</button>
-								</p>
-								<p><a target="_blank" href="{{timeline}}">{{posts.length}} Posts</a>, <a target="_blank" href="https://linkeddata.github.io/profile-editor/#/friends/view?webid={{profile | escape}}">Friends</a></p>
-								<span ng-repeat="friend in friends">
-									<a ng-show="friend.avatar" ng-click="setProfile(friend.id)"><img title="{{friend.name}}" ng-src="{{friend.avatar}}" width="28px" height="28px" /></a>
-								</span>
-							</span>
-							<span ng-if="!profile">
-								<p><a ng-click="TLSlogin()">Sign In</a> or <a target="_blank" href="https://solid.github.io/solid-idps/">Register</a></p>
-							</span>
+        // Find all posts (SIOC:Post type)
+        const postNodes = store.each(null, RDF('type'), SIOC('Post'))
+        console.log('Found posts:', postNodes.length)
 
-						</div>
-					</div>
+        for (const postNode of postNodes) {
+          const created = store.any(postNode, DCT('created'))
+          const creator = store.any(postNode, DCT('creator'))
+          const content = store.any(postNode, SIOC('content'))
+          const img = store.any(postNode, FOAF('img'))
+          const replyTo = store.any(postNode, SIOC('reply_of'))
 
+          // Skip replies (comments)
+          if (replyTo) continue
 
-					<div class="panel panel-default">
-						<div class="panel-heading"><h4>Activity ({{date}})</h4><a href="#" ng-click="recent()">Recent</a> | <a href="#" ng-click="all()">All</a></div>
-						<div class="panel-body">
+          // Get likes
+          const likes = store.each(null, LIKE('likes'), postNode).map(l => l.value)
 
-							<button id="PreviousMonth-selector" style="margin-bottom: 10px;" class="btn"><</button>
-							<button id="NextMonth-selector" style="margin-bottom: 10px;" class="btn">></button>
+          // Get comments
+          const commentNodes = store.each(null, SIOC('reply_of'), postNode)
+          const comments = []
+          for (const cn of commentNodes) {
+            const cc = store.any(cn, SIOC('content'))
+            const ccreated = store.any(cn, DCT('created'))
+            const ccreator = store.any(cn, DCT('creator'))
+            if (cc && ccreator) {
+              const cProfile = await fetchProfile(ccreator.value)
+              comments.push({
+                id: cn.value,
+                author: cProfile,
+                content: cc.value,
+                created: ccreated ? new Date(ccreated.value) : new Date()
+              })
+            }
+          }
+          comments.sort((a, b) => a.created - b.created)
 
-							<div id="calendar">
-							</div>
+          if (content && creator) {
+            const authorProfile = await fetchProfile(creator.value)
+            posts.push({
+              id: postNode.value,
+              author: authorProfile,
+              content: content.value,
+              image: img?.value || null,
+              created: created ? new Date(created.value) : new Date(),
+              likes,
+              comments
+            })
+          }
+        }
 
-						</div>
-					</div>
+        // Sort by date descending
+        posts.sort((a, b) => b.created - a.created)
+      } catch (e) {
+        console.error('Failed to fetch timeline:', e)
+      }
+      return posts
+    }
 
+    // Ensure timeline container exists
+    async function ensureContainer(uri) {
+      const authFetch = getAuthFetch()
+      console.log('Ensuring container exists:', uri)
+      try {
+        const res = await authFetch(uri, { method: 'HEAD' })
+        console.log('HEAD response:', res.status)
+        if (res.ok) return true
+      } catch (e) {
+        console.log('HEAD error:', e)
+      }
 
+      // Container doesn't exist, create it
+      console.log('Creating container:', uri)
+      const res = await authFetch(uri, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'text/turtle',
+          'Link': '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"'
+        }
+      })
+      console.log('PUT response:', res.status, res.statusText)
+      if (!res.ok) {
+        const body = await res.text()
+        console.log('PUT error body:', body)
+      }
+      return res.ok
+    }
 
+    // Create a new post
+    async function createPost(timelineUri, content, user) {
+      console.log('Creating post in timeline:', timelineUri)
+      const today = new Date().toISOString().slice(0, 10)
+      const dayFileUri = `${timelineUri}${today}.ttl`
+      const postId = `#post-${Date.now()}`
 
+      // Ensure timeline container exists
+      const timelineOk = await ensureContainer(timelineUri)
+      console.log('Timeline container ready:', timelineOk)
 
+      // Check if day file exists
+      const dayHead = await getAuthFetch()(dayFileUri, { method: 'HEAD' })
+      const dayExists = dayHead.ok
 
+      if (!dayExists) {
+        // Create new day file with prefixes and first post
+        const turtle = `@prefix sioc: <http://rdfs.org/sioc/ns#>.
+@prefix dct: <http://purl.org/dc/terms/>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
+<${postId}> a sioc:Post ;
+    sioc:content """${content.replace(/"/g, '\\"')}""" ;
+    dct:created "${new Date().toISOString()}"^^xsd:dateTime ;
+    dct:creator <${user.webId}> .
+`
+        console.log('Creating new day file:', dayFileUri)
+        const response = await getAuthFetch()(dayFileUri, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'text/turtle' },
+          body: turtle
+        })
 
-					<div class="panel panel-default">
-						<div class="panel-heading"><h4>Solid Resources</h4></div>
-						<div class="panel-body">
-							<div class="list-group">
-								<a target="_blank" href="https://solid.github.io/solid-idps/" class="list-group-item">Join Solid</a>
-								<a target="_blank" href="https://github.com/solid/solid-apps" class="list-group-item">Apps</a>
-								<a target="_blank" href="https://github.com/solid/solid-spec" class="list-group-item">Spec</a>
-							</div>
-						</div>
-					</div>
+        console.log('PUT response:', response.status, response.statusText)
+        if (!response.ok) {
+          const body = await response.text()
+          console.log('PUT error body:', body)
+          throw new Error('Failed to create post: ' + response.status)
+        }
+      } else {
+        // Append to existing day file using PATCH
+        const sparql = `INSERT DATA {
+  <${postId}> a <http://rdfs.org/sioc/ns#Post> ;
+    <http://rdfs.org/sioc/ns#content> """${content.replace(/"/g, '\\"')}""" ;
+    <http://purl.org/dc/terms/created> "${new Date().toISOString()}"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+    <http://purl.org/dc/terms/creator> <${user.webId}> .
+}`
+        console.log('PATCHing day file:', dayFileUri)
+        console.log('SPARQL:', sparql)
 
+        const response = await getAuthFetch()(dayFileUri, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/sparql-update' },
+          body: sparql
+        })
 
-					<div class="panel panel-default">
-						<div class="panel-heading"><h4>What Is Solid?</h4></div>
-						<div class="panel-body">
-							<a target="_blank" href="https://github.com/solid/solid">Solid</a> is a set of protocols to redecentralize the web.
-						</div>
-					</div>
+        console.log('PATCH response:', response.status, response.statusText)
+        if (!response.ok) {
+          const body = await response.text()
+          console.log('PATCH error body:', body)
+          throw new Error('Failed to create post: ' + response.status)
+        }
+      }
 
+      console.log('Post created:', dayFileUri + postId)
+      return dayFileUri + postId
+    }
 
+    // Like/unlike a post
+    async function toggleLike(postUri, userWebId, isLiked) {
+      const docUri = postUri.split('#')[0]
+      const sparql = isLiked
+        ? `DELETE DATA { <${userWebId}> <http://ontologi.es/like#likes> <${postUri}> . }`
+        : `INSERT DATA { <${userWebId}> <http://ontologi.es/like#likes> <${postUri}> . }`
 
-				</div><!--/row-->
+      await getAuthFetch()(docUri, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/sparql-update' },
+        body: sparql
+      })
+    }
 
+    // Add a comment
+    async function addComment(postUri, content, user, timelineUri) {
+      const today = new Date().toISOString().slice(0, 10)
+      const dayUri = `${timelineUri}${today}/`
+      const commentId = `#comment-${Date.now()}`
 
+      const turtle = `
+@prefix sioc: <http://rdfs.org/sioc/ns#>.
+@prefix dct: <http://purl.org/dc/terms/>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
+<${commentId}> a sioc:Post ;
+    sioc:content """${content.replace(/"/g, '\\"')}""" ;
+    sioc:reply_of <${postUri}> ;
+    dct:created "${new Date().toISOString()}"^^xsd:dateTime ;
+    dct:creator <${user.webId}> .
+`
 
-			</div><!-- /col-9 -->
+      await getAuthFetch()(dayUri, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/turtle' },
+        body: turtle
+      })
+    }
 
+    // Helper: relative time
+    function timeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000)
+      if (seconds < 60) return 'Just now'
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m`
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`
+      return `${Math.floor(seconds / 86400)}d`
+    }
 
-		</div><!-- /padding -->
-	</div>
-	<!-- /main -->
+    // Components
+    function Header({ user, onLogin, onLogout }) {
+      return html`
+        <header class="header">
+          <a href="#" class="header-logo">solid</a>
+          <input type="text" class="header-search" placeholder="Search..." />
+          <div class="header-right">
+            ${user ? html`
+              <img src=${user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                   class="header-avatar"
+                   title=${user.name} />
+              <button class="login-btn" onClick=${onLogout}>Logout</button>
+            ` : html`
+              <button class="login-btn" onClick=${onLogin}>Login</button>
+            `}
+          </div>
+        </header>
+      `
+    }
 
-</div>
-</div>
-</div>
+    function Composer({ user, onPost }) {
+      const [expanded, setExpanded] = useState(false)
+      const [content, setContent] = useState('')
 
+      const handlePost = () => {
+        if (content.trim()) {
+          onPost(content)
+          setContent('')
+          setExpanded(false)
+        }
+      }
 
-<!--post modal-->
-<div id="postModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-				Update Status
-			</div>
-			<div class="modal-body">
-				<form class="form center-block">
-					<div class="form-group">
-						<textarea class="form-control input-lg" autofocus="" placeholder="What do you want to share?"></textarea>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<div>
-					<button class="btn btn-primary btn-sm" data-dismiss="modal" aria-hidden="true">Post</button>
-					<ul class="pull-left list-inline"><li><a href=""><i class="glyphicon glyphicon-upload"></i></a></li><li><a href=""><i class="glyphicon glyphicon-camera"></i></a></li><li><a href=""><i class="glyphicon glyphicon-map-marker"></i></a></li></ul>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
+      if (!user) return null
 
-<!--image modal-->
-<div id="imageModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-				Add image
-			</div>
-			<div class="modal-body">
-				<form class="form center-block">
-					<div class="form-group">
-						<textarea class="form-control input-lg" ng-model="img" autofocus="" placeholder="Add image here"></textarea>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
-</div>
-<!-- script references -->
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/scripts.js"></script>
+      return html`
+        <div class="composer">
+          <div class="composer-top">
+            <img src=${user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'} class="composer-avatar" />
+            ${!expanded ? html`
+              <input
+                type="text"
+                class="composer-input"
+                placeholder="What's on your mind, ${user.name?.split(' ')[0]}?"
+                onFocus=${() => setExpanded(true)}
+              />
+            ` : html`
+              <span style="font-weight: 500">Create post</span>
+            `}
+          </div>
+          ${expanded && html`
+            <div class="composer-expanded">
+              <textarea
+                class="composer-textarea"
+                placeholder="What's on your mind?"
+                value=${content}
+                onInput=${e => setContent(e.target.value)}
+                autofocus
+              />
+              <div class="composer-actions">
+                <div class="composer-buttons">
+                  <button class="composer-btn">📷 Photo</button>
+                  <button class="composer-btn">📍 Location</button>
+                </div>
+                <button
+                  class="post-btn"
+                  disabled=${!content.trim()}
+                  onClick=${handlePost}
+                >Post</button>
+              </div>
+            </div>
+          `}
+        </div>
+      `
+    }
+
+    function Comment({ comment }) {
+      return html`
+        <div class="comment">
+          <img src=${comment.author.avatar} class="comment-avatar" />
+          <div>
+            <div class="comment-body">
+              <div class="comment-author">${comment.author.name}</div>
+              <div class="comment-text">${comment.content}</div>
+            </div>
+            <div class="comment-time">${timeAgo(comment.created)}</div>
+          </div>
+        </div>
+      `
+    }
+
+    function Post({ post, user, onLike, onComment }) {
+      const [showComments, setShowComments] = useState(false)
+      const [commentText, setCommentText] = useState('')
+
+      const isLiked = user && post.likes.includes(user.webId)
+      const likeCount = post.likes.length
+      const commentCount = post.comments.length
+
+      const handleComment = (e) => {
+        if (e.key === 'Enter' && commentText.trim()) {
+          onComment(post.id, commentText)
+          setCommentText('')
+        }
+      }
+
+      return html`
+        <article class="post">
+          <div class="post-header">
+            <img src=${post.author.avatar} class="post-avatar" />
+            <div class="post-meta">
+              <a href=${post.author.webId} class="post-author" target="_blank">${post.author.name}</a>
+              <div class="post-time">${timeAgo(post.created)}</div>
+            </div>
+            <button class="post-menu">⋯</button>
+          </div>
+
+          <div class="post-content">${post.content}</div>
+
+          ${post.image && html`<img src=${post.image} class="post-image" />`}
+
+          ${(likeCount > 0 || commentCount > 0) && html`
+            <div class="post-stats">
+              <span class="post-likes">${likeCount > 0 ? `👍 ${likeCount}` : ''}</span>
+              <span class="post-comments" onClick=${() => setShowComments(!showComments)}>
+                ${commentCount > 0 ? `${commentCount} comment${commentCount > 1 ? 's' : ''}` : ''}
+              </span>
+            </div>
+          `}
+
+          <div class="post-actions">
+            <button class="action-btn ${isLiked ? 'liked' : ''}" onClick=${() => onLike(post.id)}>
+              ${isLiked ? '👍' : '👍'} Like
+            </button>
+            <button class="action-btn" onClick=${() => setShowComments(!showComments)}>
+              💬 Comment
+            </button>
+            <button class="action-btn">
+              ↗️ Share
+            </button>
+          </div>
+
+          ${showComments && html`
+            <div class="comments">
+              ${post.comments.map(c => html`<${Comment} comment=${c} />`)}
+              ${user && html`
+                <div class="comment-input-row">
+                  <img src=${user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'} class="comment-avatar" />
+                  <input
+                    type="text"
+                    class="comment-input"
+                    placeholder="Write a comment..."
+                    value=${commentText}
+                    onInput=${e => setCommentText(e.target.value)}
+                    onKeyPress=${handleComment}
+                  />
+                </div>
+              `}
+            </div>
+          `}
+        </article>
+      `
+    }
+
+    function LoginModal({ onLogin, onClose }) {
+      const [idp, setIdp] = useState('solidweb.org')
+
+      return html`
+        <div class="modal-overlay" onClick=${onClose}>
+          <div class="modal" onClick=${e => e.stopPropagation()}>
+            <h2>Login to Solid</h2>
+            <input
+              type="text"
+              class="modal-input"
+              placeholder="Your Solid IDP (e.g. solidweb.org)"
+              value=${idp}
+              onInput=${e => setIdp(e.target.value)}
+            />
+            <div class="modal-actions">
+              <button class="modal-cancel" onClick=${onClose}>Cancel</button>
+              <button class="login-btn" onClick=${() => onLogin(idp)}>Login</button>
+            </div>
+          </div>
+        </div>
+      `
+    }
+
+    function App() {
+      const [user, setUser] = useState(null)
+      const [posts, setPosts] = useState([])
+      const [showLogin, setShowLogin] = useState(false)
+      const [loading, setLoading] = useState(true)
+      const [error, setError] = useState(null)
+
+      // Initialize: check for redirect callback or restore session
+      useEffect(() => {
+        async function init() {
+          try {
+            // Handle OAuth redirect and restore session
+            const session = await initAuth()
+
+            if (session) {
+              const profile = await fetchProfile(session.webId)
+              setUser(profile)
+
+              // Load timeline if available
+              if (profile.timeline) {
+                const timelinePosts = await fetchTimeline(profile.timeline)
+                setPosts(timelinePosts)
+              }
+            }
+          } catch (e) {
+            console.error('Init failed:', e)
+            setError(e.message)
+          } finally {
+            setLoading(false)
+          }
+        }
+        init()
+      }, [])
+
+      const handleLogin = async (idp) => {
+        try {
+          setShowLogin(false)
+          await solidLogin(idp)
+        } catch (e) {
+          setError('Login failed: ' + e.message)
+        }
+      }
+
+      const handleLogout = () => {
+        doLogout()
+      }
+
+      const handlePost = async (content) => {
+        if (!user?.timeline) {
+          setError('No timeline configured in your profile')
+          return
+        }
+        try {
+          await createPost(user.timeline, content, user)
+          // Refresh posts
+          const timelinePosts = await fetchTimeline(user.timeline)
+          setPosts(timelinePosts)
+        } catch (e) {
+          setError('Failed to create post: ' + e.message)
+        }
+      }
+
+      const handleLike = async (postId) => {
+        if (!user) {
+          setShowLogin(true)
+          return
+        }
+        try {
+          const post = posts.find(p => p.id === postId)
+          const isLiked = post.likes.includes(user.webId)
+          await toggleLike(postId, user.webId, isLiked)
+
+          // Update local state optimistically
+          setPosts(posts.map(p => {
+            if (p.id === postId) {
+              return {
+                ...p,
+                likes: isLiked
+                  ? p.likes.filter(l => l !== user.webId)
+                  : [...p.likes, user.webId]
+              }
+            }
+            return p
+          }))
+        } catch (e) {
+          setError('Failed to like post: ' + e.message)
+        }
+      }
+
+      const handleComment = async (postId, content) => {
+        if (!user?.timeline) return
+        try {
+          await addComment(postId, content, user, user.timeline)
+
+          // Update local state optimistically
+          setPosts(posts.map(p => {
+            if (p.id === postId) {
+              return {
+                ...p,
+                comments: [...p.comments, {
+                  id: Date.now().toString(),
+                  author: user,
+                  content,
+                  created: new Date()
+                }]
+              }
+            }
+            return p
+          }))
+        } catch (e) {
+          setError('Failed to add comment: ' + e.message)
+        }
+      }
+
+      const handleRefresh = async () => {
+        if (!user?.timeline) return
+        setLoading(true)
+        try {
+          const timelinePosts = await fetchTimeline(user.timeline)
+          setPosts(timelinePosts)
+        } catch (e) {
+          setError('Failed to refresh: ' + e.message)
+        } finally {
+          setLoading(false)
+        }
+      }
+
+      return html`
+        <${Header} user=${user} onLogin=${() => setShowLogin(true)} onLogout=${handleLogout} />
+
+        <div class="container">
+          ${error && html`
+            <div class="error-banner" onClick=${() => setError(null)}>
+              ${error} <span style="float:right;cursor:pointer">×</span>
+            </div>
+          `}
+
+          <${Composer} user=${user} onPost=${handlePost} />
+
+          ${!user && !loading && html`
+            <div class="welcome-card">
+              <h2>Welcome to Solid Timeline</h2>
+              <p>A decentralized social feed where you own your data.</p>
+              <ul>
+                <li>Posts stored on your Solid pod</li>
+                <li>Comments and likes in RDF</li>
+                <li>Real-time updates via WebSocket</li>
+                <li>Works with any Solid pod provider</li>
+              </ul>
+              <button class="login-btn" onClick=${() => setShowLogin(true)}>
+                Login with Solid
+              </button>
+              <p class="welcome-footer">
+                Don't have a pod? <a href="https://solidweb.org/" target="_blank">Get one free</a>
+              </p>
+            </div>
+          `}
+
+          ${user && !user.timeline && !loading && html`
+            <div class="welcome-card">
+              <h2>No Storage Found</h2>
+              <p>Your profile doesn't have a storage location configured.</p>
+              <p>Make sure your WebID profile includes:</p>
+              <code style="font-family: monospace">${'<#me> pim:storage <https://your.pod/> .'}</code>
+              <p style="margin-top: 12px; font-size: 14px; color: var(--text-secondary)">
+                Timeline will be stored at: <strong>/public/timeline/</strong>
+              </p>
+            </div>
+          `}
+
+          ${loading ? html`
+            <div class="loading">Loading posts...</div>
+          ` : posts.length > 0 ? posts.map(post => html`
+            <${Post}
+              key=${post.id}
+              post=${post}
+              user=${user}
+              onLike=${handleLike}
+              onComment=${handleComment}
+            />
+          `) : user?.timeline ? html`
+            <div class="empty-state">
+              <p>No posts yet. Write your first post above!</p>
+            </div>
+          ` : null}
+        </div>
+
+        ${showLogin && html`<${LoginModal} onLogin=${handleLogin} onClose=${() => setShowLogin(false)} />`}
+      `
+    }
+
+    render(html`<${App} />`, document.getElementById('app'))
+  </script>
 </body>
-
-<script src="bower_components/d3/d3.min.js"></script>
-<script src="bower_components/cal-heatmap/cal-heatmap.min.js"></script>
-<script src="bower_components/jquery/dist/jquery.min.js"></script>
-<script src="bower_components/velocity/velocity.min.js"></script>
-<script src="bower_components/angular/angular.min.js"></script>
-<script src="bower_components/angular-ui/build/angular-ui.min.js"></script>
-<script src="bower_components/lumx/dist/lumx.min.js"></script>
-<script src="bower_components/angular-audio/app/angular.audio.js"></script>
-<script src="bower_components/notie/notie.js"></script>
-<script src="bower_components/dexie/dist/latest/Dexie.js"></script>
-
-<script src="vendor/rdflib.js"></script>
-<script src="vendor/common.js"></script>
-
-<script src="bower_components/moment/moment.js"></script>
-<script src="bower_components/angular-moment/angular-moment.js"></script>
-
-
-<!-- App -->
-<script src="app/app.js"></script>
-
 </html>

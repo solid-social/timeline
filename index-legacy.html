@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="Timeline">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<meta charset="utf-8">
+	<title>Solid Timeline</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link rel="shortcut icon" type="img/png" href="images/favicon.png">
+
+	<!--[if lt IE 9]>
+	<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+
+	<link href="css/styles.css" rel="stylesheet">
+	<link href="bower_components/cal-heatmap/cal-heatmap.css" rel="stylesheet">
+
+</head>
+<body>
+	<div class="wrapper" ng-controller="Main">
+		<div class="box">
+			<div class="row row-offcanvas row-offcanvas-left">
+
+
+				<!-- sidebar -->
+				<div class="column col-sm-2 col-xs-1 sidebar-offcanvas" id="sidebar">
+
+					<ul class="nav">
+						<li><a href="#" data-toggle="offcanvas" class="visible-xs text-center"><i class="glyphicon glyphicon-chevron-right"></i></a></li>
+					</ul>
+
+					<ul class="nav hidden-xs" id="lg-menu">
+						<li class="active"><a ng-click="setProfile()"><i class="glyphicon glyphicon-user"></i> {{ name || 'Profile' }}</a></li>
+						<li class="active"><a ng-click="featured()"><i class="glyphicon glyphicon-list-alt"></i> News Feed</a></li>
+						<li><a ng-click="stories()" href="#"><i class="glyphicon glyphicon-list"></i> All Stories</a></li>
+						<li><a ng-click="refresh()" href="#"><i class="glyphicon glyphicon-refresh"></i> Refresh</a></li>
+						<li><hr></li>
+						<li><a target="_blank" href="http://webappmarket.org/">APPS</a></li>
+
+						<li class="app" ng-repeat="app in apps"><span><img ng-src="{{app.icon}}" height="16" width="16"><a target="_blank" ng-href="{{app.homepage}}">{{app.name}}</a></span><br></li>
+
+						<!--
+						<li><a href="#"><i class="glyphicon glyphicon-paperclip"></i> Likes</a></li>
+					-->
+				</ul>
+
+				<!-- tiny only nav-->
+				<ul class="nav visible-xs" id="xs-menu">
+					<li><a href="#featured" class="text-center"><i class="glyphicon glyphicon-list-alt"></i></a></li>
+					<li><a href="#stories" class="text-center"><i class="glyphicon glyphicon-list"></i></a></li>
+					<li><a href="#" class="text-center"><i class="glyphicon glyphicon-paperclip"></i></a></li>
+					<li><a href="#" class="text-center"><i class="glyphicon glyphicon-refresh"></i></a></li>
+				</ul>
+
+			</div>
+			<!-- /sidebar -->
+
+			<!-- main right col -->
+			<div class="column col-sm-10 col-xs-11" id="main">
+
+				<!-- top nav -->
+				<div class="navbar navbar-blue navbar-static-top">
+					<div class="navbar-header">
+						<button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+							<span class="sr-only">Toggle</span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+						<a href="#" ng-click="home()" class="navbar-brand logo">S</a>
+					</div>
+					<nav class="collapse navbar-collapse" role="navigation">
+						<form class="navbar-form navbar-left">
+							<div class="input-group input-group-sm" style="max-width:360px;">
+								<input type="text" ng-model="query" class="form-control" placeholder="Search" name="srch-term" id="srch-term">
+								<div class="input-group-btn">
+									<button ng-click="search()" class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+								</div>
+							</div>
+						</form>
+						<ul class="nav navbar-nav">
+							<li>
+								<a ng-click="home()" href="#"><i class="glyphicon glyphicon-home"></i> Home</a>
+							</li>
+							<li>
+								<a target="_blank" href="https://solid.github.io/solid-inbox/#"><i class="glyphicon glyphicon-inbox"></i> Inbox</a>
+							</li>
+							<!--
+							<li>
+							<a href="#postModal" role="button" data-toggle="modal"><i class="glyphicon glyphicon-plus"></i> Post</a>
+						</li>
+						<li>
+						<a href="#"><span class="badge">badge</span></a>
+					</li>
+				-->
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span ng-if="user">{{username}}</span> &nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-user"></i></a>
+					<ul class="dropdown-menu">
+						<li ng-if="!user"><a ng-click="TLSlogin()">Sign In</a></li>
+						<li ng-if="user"><a ng-click="logout()">Sign Out</a></li>
+						<li ng-if="user"><a target="_blank" href="https://linkeddata.github.io/profile-editor/">Edit Profile</a></li>
+						<li ng-if="!user"><a target="_blank" href="https://solid.github.io/solid-idps/">Register</a></li>
+						<li><a target="_blank" href="https://github.com/solid-social/timeline">Source Code</a></li>
+  					<li><a target="_blank" href="https://melvincarvalho.gitbooks.io/solid-social/content/">About</a></li>
+					</ul>
+				</li>
+			</ul>
+		</nav>
+	</div>
+	<!-- /top nav -->
+
+	<div class="padding">
+		<div class="full col-sm-9">
+
+			<!-- content -->
+			<div class="row">
+
+				<!-- main col left -->
+				<div class="col-sm-5">
+
+
+					<div ng-show="user && !postid" class="well">
+						<form class="form-horizontal" role="form">
+							<h4>What's New</h4>
+							<div class="form-group" style="padding:14px;">
+								<textarea ng-model="post" class="form-control" placeholder="Update your status"></textarea>
+							</div>
+							<button class="btn btn-primary pull-right" ng-click="save()" type="button">Post</button>
+							<ul class="list-inline"><li><a href=""><i class="glyphicon glyphicon-upload"></i></a></li>
+								<li><a href="#imageModal" role="button" data-toggle="modal"><i class="glyphicon glyphicon-camera"></i></a></li>
+								<li><a href=""><i class="glyphicon glyphicon-map-marker"></i></a></li>
+							</ul>
+						</form>
+					</div>
+
+					<div ng-if="!user" class="well">
+						<a ng-click="TLSlogin()">Sign In</a> or <a target="_blank" href="https://solid.github.io/solid-idps/">Register</a>
+					</div>
+
+
+					<div ng-repeat="n in posts" class="panel panel-default">
+
+						<div class="panel-heading">
+							<img class="title-img pull-left" ng-show="n[6]" ng-src="{{n[6]}}" height="40" width="40"></img>
+							<a ng-click="setProfile(n[1])" class="name title-name">{{n[5].value}}</a>
+							<a  href="{{n[3]}}" target="_blank" class="time pull-right"><i class="glyphicon glyphicon-chevron-down"></i></a>
+							<br><a class="title-time time" ng-click="showPost(n[3])" href="#" am-time-ago="n[0]"></a>
+						</div>
+						<div ng-if="n[4]" class="panel-thumbnail"><img ng-src="{{n[4]}}" class="img-responsive"></div>
+						<div class="panel-body">
+							<p>
+								<span ng-bind-html="n[2] | parseUrlFilter"></span>
+							</p>
+							<div class="clearfix"></div>
+							<hr>
+
+							<form class="comment-block">
+
+								<div ng-if="n[8]">
+									<span ng-repeat="l in n[7]" style="color: #5890FF" class="panel panel-default">{{l}} </span> like<span ng-if="n[8] === 1">s</span> this<hr>
+								</div>
+
+								<div ng-if="n[10]">
+									<div class="comment-name" ng-repeat="c in n[10]" class="">
+										<div class="comment-img">
+											<img style="vertical-align: top" ng-show="c.img.uri" ng-src="{{c.img.uri}}" height="32" width="32"></img>
+										</div>
+										<div class="comment-text">
+											<a class="name" >{{c.name.value}}</a>
+  										<span>{{c.content.value}}</span><br>
+  										<a class="time" href="{{c.subject.uri}}" target="_blank" am-time-ago="c.created.value"></a>
+									  </div>
+										<hr>
+									</div>
+								</div>
+
+								<div class="input-group">
+
+									<div class="input-group-btn">
+
+										<button ng-if="n[9]" title="{{n[7]}}" ng-click="unlike(n[3])" class="btn btn-default" style="color: #5890FF"><i class="glyphicon glyphicon-thumbs-up"></i></button>
+										<button ng-if="!n[9]" title="{{n[7]}}" ng-click="like(n[3])" class="btn btn-default"><i class="glyphicon glyphicon-thumbs-up"></i></button>
+
+										<a href="{{n[3]}}" target="_blank" class="btn btn-default"><i class="glyphicon glyphicon-share"></i></a>
+									</div>
+
+								</form>
+								<form ng-submit="addcomment(n.comment, n[3])">
+									<input title="{{n[10]}}" type="text" ng-keyup="$event.keyCode == 13 ? addComment(n.comment, n[3]) : null" class="form-control" ng-model="n.comment" placeholder="Add a comment..">
+								</div>
+							</form>
+
+						</div>
+					</div>
+
+					<div><a ng-if="profile && !postid" ng-click="older()">Older</a></div>
+
+				</div>
+
+				<!-- main col right -->
+				<div class="col-sm-7">
+
+					<div class="panel panel-default">
+						<div class="panel-thumbnail"><img ng-src="{{backgroundImage}}" class="img-responsive"></div>
+						<div class="panel-body">
+							<span ng-if="profile">
+								<p>
+									<img ng-show="profileAvatar" ng-src="{{profileAvatar}}" height="40" width="40"></img>
+									<a class="lead" ng-href="{{profile}}">{{name}}</a> <a ng-click="refresh(profile)" href="#"><i class="glyphicon glyphicon-refresh"></i></a>
+									<button ng-if="friendType" ng-click="addFriend()" class="btn botton3">{{friendType}}</button>
+								</p>
+								<p><a target="_blank" href="{{timeline}}">{{posts.length}} Posts</a>, <a target="_blank" href="https://linkeddata.github.io/profile-editor/#/friends/view?webid={{profile | escape}}">Friends</a></p>
+								<span ng-repeat="friend in friends">
+									<a ng-show="friend.avatar" ng-click="setProfile(friend.id)"><img title="{{friend.name}}" ng-src="{{friend.avatar}}" width="28px" height="28px" /></a>
+								</span>
+							</span>
+							<span ng-if="!profile">
+								<p><a ng-click="TLSlogin()">Sign In</a> or <a target="_blank" href="https://solid.github.io/solid-idps/">Register</a></p>
+							</span>
+
+						</div>
+					</div>
+
+
+					<div class="panel panel-default">
+						<div class="panel-heading"><h4>Activity ({{date}})</h4><a href="#" ng-click="recent()">Recent</a> | <a href="#" ng-click="all()">All</a></div>
+						<div class="panel-body">
+
+							<button id="PreviousMonth-selector" style="margin-bottom: 10px;" class="btn"><</button>
+							<button id="NextMonth-selector" style="margin-bottom: 10px;" class="btn">></button>
+
+							<div id="calendar">
+							</div>
+
+						</div>
+					</div>
+
+
+
+
+
+
+
+
+					<div class="panel panel-default">
+						<div class="panel-heading"><h4>Solid Resources</h4></div>
+						<div class="panel-body">
+							<div class="list-group">
+								<a target="_blank" href="https://solid.github.io/solid-idps/" class="list-group-item">Join Solid</a>
+								<a target="_blank" href="https://github.com/solid/solid-apps" class="list-group-item">Apps</a>
+								<a target="_blank" href="https://github.com/solid/solid-spec" class="list-group-item">Spec</a>
+							</div>
+						</div>
+					</div>
+
+
+					<div class="panel panel-default">
+						<div class="panel-heading"><h4>What Is Solid?</h4></div>
+						<div class="panel-body">
+							<a target="_blank" href="https://github.com/solid/solid">Solid</a> is a set of protocols to redecentralize the web.
+						</div>
+					</div>
+
+
+
+				</div><!--/row-->
+
+
+
+
+			</div><!-- /col-9 -->
+
+
+		</div><!-- /padding -->
+	</div>
+	<!-- /main -->
+
+</div>
+</div>
+</div>
+
+
+<!--post modal-->
+<div id="postModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				Update Status
+			</div>
+			<div class="modal-body">
+				<form class="form center-block">
+					<div class="form-group">
+						<textarea class="form-control input-lg" autofocus="" placeholder="What do you want to share?"></textarea>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<div>
+					<button class="btn btn-primary btn-sm" data-dismiss="modal" aria-hidden="true">Post</button>
+					<ul class="pull-left list-inline"><li><a href=""><i class="glyphicon glyphicon-upload"></i></a></li><li><a href=""><i class="glyphicon glyphicon-camera"></i></a></li><li><a href=""><i class="glyphicon glyphicon-map-marker"></i></a></li></ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--image modal-->
+<div id="imageModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				Add image
+			</div>
+			<div class="modal-body">
+				<form class="form center-block">
+					<div class="form-group">
+						<textarea class="form-control input-lg" ng-model="img" autofocus="" placeholder="Add image here"></textarea>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- script references -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/scripts.js"></script>
+</body>
+
+<script src="bower_components/d3/d3.min.js"></script>
+<script src="bower_components/cal-heatmap/cal-heatmap.min.js"></script>
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="bower_components/velocity/velocity.min.js"></script>
+<script src="bower_components/angular/angular.min.js"></script>
+<script src="bower_components/angular-ui/build/angular-ui.min.js"></script>
+<script src="bower_components/lumx/dist/lumx.min.js"></script>
+<script src="bower_components/angular-audio/app/angular.audio.js"></script>
+<script src="bower_components/notie/notie.js"></script>
+<script src="bower_components/dexie/dist/latest/Dexie.js"></script>
+
+<script src="vendor/rdflib.js"></script>
+<script src="vendor/common.js"></script>
+
+<script src="bower_components/moment/moment.js"></script>
+<script src="bower_components/angular-moment/angular-moment.js"></script>
+
+
+<!-- App -->
+<script src="app/app.js"></script>
+
+</html>
